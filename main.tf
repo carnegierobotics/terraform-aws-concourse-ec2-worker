@@ -60,47 +60,6 @@ resource "aws_security_group_rule" "all_udp" {
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
-/*
-resource "aws_security_group_rule" "ntp" {
-  type              = "egress"
-  security_group_id = aws_security_group.default.id
-  from_port         = 123
-  to_port           = 123
-  protocol          = "udp"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
-
-resource "aws_security_group_rule" "http" {
-  type              = "egress"
-  security_group_id = aws_security_group.default.id
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
-
-resource "aws_security_group_rule" "https_out" {
-  security_group_id = aws_security_group.default.id
-  type              = "egress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-
-  cidr_blocks = ["0.0.0.0/0"]
-}
-
-resource "aws_security_group_rule" "ssh_out" {
-  security_group_id = aws_security_group.default.id
-  type              = "egress"
-  from_port         = 2222
-  to_port           = 2222
-  protocol          = "tcp"
-
-  # TODO: can this be restricted to the TSA security group?
-  cidr_blocks = ["0.0.0.0/0"]
-}
-*/
-
 # Get the latest ubuntu ami
 data "aws_ami" "ubuntu" {
   most_recent = true
