@@ -66,7 +66,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
   }
 
   filter {
@@ -137,6 +137,10 @@ module "autoscale_group" {
       }
     }
   ]
+}
+
+data "template_file" "garden_ini" {
+  template = file("${path.module}/garden_ini.tpl")
 }
 
 data "template_file" "concourse_systemd" {
@@ -223,12 +227,17 @@ EOF
 
   }
 
-  # Create concourse_worker systemd service file
+  # Create garden.ini configuration file
   part {
     content_type = "text/cloud-config"
 
     content = <<EOF
 write_files:
+- encoding: b64
+  content: ${base64encode(data.template_file.garden_ini.rendered)}
+  owner: root:root
+  path: /etc/concourse/garden.ini
+  permissions: '0644'
 - encoding: b64
   content: ${base64encode(data.template_file.concourse_systemd.rendered)}
   owner: root:root

@@ -75,6 +75,6 @@ resource "aws_iam_role_policy" "cross_account_worker" {
 }
 
 resource "aws_iam_instance_profile" "default" {
-  name = "${module.default_label.id}"
+  name = module.default_label.id
   role = aws_iam_role.default.id
 }
