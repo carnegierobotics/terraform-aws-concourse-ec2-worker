@@ -142,6 +142,12 @@ variable "concourse_version" {
   type        = string
 }
 
+variable "concourse_worker_dns_servers" {
+  description = "DNS server list"
+  default     = ["8.8.8.8", "8.8.4.4"]
+  type        = list(string)
+}
+
 variable "keys_bucket_id" {
   description = "The S3 bucket id which contains the SSH keys to connect to the TSA"
   type        = string
