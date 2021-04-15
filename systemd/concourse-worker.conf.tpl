@@ -1,0 +1,9 @@
+[Service]
+Environment=CONCOURSE_RUNTIME=containerd
+Environment=CONCOURSE_CONTAINERD_DNS_PROXY_ENABLE=false
+Environment=CONCOURSE_CONTAINERD_DNS_SERVER=${concourse_worker_dns_servers}
+Environment=CONCOURSE_TAG=${concourse_tags}
+Environment=CONCOURSE_TSA_HOST=${concourse_tsa_host}
+Environment=CONCOURSE_TSA_PUBLIC_KEY=/etc/concourse/tsa_host_key.pub
+Environment=CONCOURSE_TSA_WORKER_PRIVATE_KEY=/etc/concourse/worker_key
+Environment=CONCOURSE_WORK_DIR=/opt/concourse

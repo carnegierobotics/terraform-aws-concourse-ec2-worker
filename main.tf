@@ -66,7 +66,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
   }
 
   filter {
@@ -139,18 +139,20 @@ module "autoscale_group" {
   ]
 }
 
-data "template_file" "garden_ini" {
-  template = file("${path.module}/garden_ini.tpl")
-}
-
-data "template_file" "concourse_systemd" {
-  template = file("${path.module}/concourse_systemd.tpl")
+data "template_file" "concourse_systemd_worker_config" {
+  template = file("${path.module}/systemd/concourse-worker.conf.tpl")
 
   vars = {
-    concourse_tsa_hostname = "${var.concourse_tsa_hostname}:${var.worker_tsa_port}"
-    tags                   = join(" ", formatlist("--tag=%s", var.concourse_tags))
+    concourse_tsa_host            = "${var.concourse_tsa_hostname}:${var.worker_tsa_port}"
+    concourse_tags                = join(",", var.concourse_tags)
+    concourse_worker_dns_servers  = join(",", var.concourse_worker_dns_servers)
   }
 }
+
+data "local_file" "concourse_systemd" {
+  filename = "${path.module}/systemd/concourse-worker.service"
+}
+
 
 data "template_file" "concourse_bootstrap" {
   template = file("${path.module}/bootstrap_concourse.sh.tpl")
@@ -227,19 +229,19 @@ EOF
 
   }
 
-  # Create garden.ini configuration file
+  # Create service configuration files
   part {
     content_type = "text/cloud-config"
 
     content = <<EOF
 write_files:
 - encoding: b64
-  content: ${base64encode(data.template_file.garden_ini.rendered)}
+  content: ${base64encode(data.template_file.concourse_systemd_worker_config.rendered)}
   owner: root:root
-  path: /etc/concourse/garden.ini
-  permissions: '0644'
+  path: /etc/systemd/system/concourse_worker.service.d/worker.conf
+  permissions: '0755'
 - encoding: b64
-  content: ${base64encode(data.template_file.concourse_systemd.rendered)}
+  content: ${data.local_file.concourse_systemd.content_base64}
   owner: root:root
   path: /etc/systemd/system/concourse_worker.service
   permissions: '0755'
