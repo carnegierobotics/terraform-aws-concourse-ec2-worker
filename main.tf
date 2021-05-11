@@ -1,18 +1,8 @@
-module "default_label" {
-  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.16.0"
-  name       = var.name
-  namespace  = var.namespace
-  stage      = var.stage
-  tags       = var.tags
-  attributes = var.attributes
-  delimiter  = var.delimiter
-}
-
 resource "aws_security_group" "default" {
-  name        = module.default_label.id
+  name        = module.this.id
   description = "Security group for the Concourse worker instances"
   vpc_id      = var.vpc_id
-  tags        = module.default_label.tags
+  tags        = module.this.tags
 }
 
 resource "aws_security_group_rule" "garden" {
@@ -79,13 +69,8 @@ data "aws_ami" "ubuntu" {
 
 
 module "autoscale_group" {
-  source     = "git::https://github.com/cloudposse/terraform-aws-ec2-autoscale-group.git?ref=tags/0.2.1"
-  name       = var.name
-  namespace  = var.namespace
-  stage      = var.stage
-  tags       = var.tags
-  attributes = concat(var.attributes, ["asg"])
-  delimiter  = var.delimiter
+  source  = "cloudposse/ec2-autoscale-group/aws"
+  version = "0.24.0"
 
   image_id                    = data.aws_ami.ubuntu.id
   instance_type               = var.instance_type
@@ -137,6 +122,9 @@ module "autoscale_group" {
       }
     }
   ]
+
+  context     = module.this.context
+  attributes  = ["asg"]
 }
 
 data "template_file" "concourse_systemd_worker_config" {
