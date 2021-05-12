@@ -12,7 +12,7 @@ data "aws_iam_policy_document" "assume" {
 }
 
 resource "aws_iam_role" "default" {
-  name               = module.default_label.id
+  name               = module.this.id
   description        = "Cross account key access role for Concourse workers"
   assume_role_policy = data.aws_iam_policy_document.assume.json
 }
@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "default" {
 
 resource "aws_iam_role_policy" "default" {
   count  = var.cross_account_worker_role_arn != null ? 0 : 1 # Disable if accessing another AWS account through an assume role
-  name   = module.default_label.id
+  name   = module.this.id
   role   = aws_iam_role.default.id
   policy = data.aws_iam_policy_document.default.json
 }
@@ -62,9 +62,10 @@ data "aws_iam_policy_document" "cross_account_worker" {
 }
 
 module "cross_account_label" {
-  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.16.0"
-  context    = module.default_label.context
-  attributes = compact(concat(var.attributes, ["cross", "account"]))
+  source      = "cloudposse/label/null"
+  version     = "0.24.1"
+  context     = module.this.context
+  attributes  = ["cross", "account"]
 }
 
 resource "aws_iam_role_policy" "cross_account_worker" {
@@ -75,6 +76,6 @@ resource "aws_iam_role_policy" "cross_account_worker" {
 }
 
 resource "aws_iam_instance_profile" "default" {
-  name = module.default_label.id
+  name = module.this.id
   role = aws_iam_role.default.id
 }
